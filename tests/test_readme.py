@@ -1,5 +1,8 @@
+"""Unittest that validates external links in README return HTTP 200."""
+
 import re
 import unittest
+from pathlib import Path
 
 try:
     import requests
@@ -8,15 +11,17 @@ except ImportError:  # Provide dummy placeholder so tests fail to import if requ
 
 
 class TestReadmeLinks(unittest.TestCase):
-    README_PATH = 'README.md'
-    LINK_PATTERN = re.compile(r'https://[^\s)"<>]+')
+    """Collect all ``https://`` links from ``README.md`` and verify them."""
+
+    README_PATH = Path(__file__).resolve().parents[1] / "README.md"
+    LINK_PATTERN = re.compile(r"https://[^\s)\"<>]+")
 
     def test_links_http_200(self):
         if requests is None:
             self.skipTest('requests library is not installed')
-        with open(self.README_PATH, 'r', encoding='utf-8') as f:
+        with open(self.README_PATH, "r", encoding="utf-8") as f:
             content = f.read()
-        links = self.LINK_PATTERN.findall(content)
+        links = set(self.LINK_PATTERN.findall(content))
         for link in links:
             with self.subTest(url=link):
                 try:
